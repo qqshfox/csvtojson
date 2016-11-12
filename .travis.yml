@@ -1,0 +1,27 @@
+language: go
+
+env:
+  - GLIDE_VERSION=v0.12.3
+
+before_install:
+  - mkdir -p $HOME/bin
+  - wget "https://github.com/Masterminds/glide/releases/download/$GLIDE_VERSION/glide-$GLIDE_VERSION-linux-amd64.tar.gz" -O- | tar -xz -C $HOME/bin --strip=1
+  - export PATH="$HOME/bin:$PATH"
+
+install:
+  - glide install
+
+script:
+  - ./build-release-binaries
+
+deploy:
+  provider: releases
+  api_key:
+    secure: sjQhRXK2h2sbc/PTgxrt+boB7FaTnFhJPyxMphPw3a64f62cpA2f7j2Rg1DQes/WiJ3MXRgMYVlqdYwyESAqt2/sZuQYE2D5C/PFg7oNO7f/VaHRWZBqAKun2YJoYfMGLDyUUU3Md/xUezrFMTSMcT9unbWADbDD/gJ+cFchVkRM2W6PF4+NSnLEk3aQqjVBtPU1vAatwbebph86nrkw8Q9lEdYQZEhrardwrUgqngNZLPxSsoikJNdXbQho3HEb48xMjnHWojuoGFyw5IPwVylfJLxKLdbqkiiNmIH7rCU5kTMfOk4pI8C2Bh1y8D+0xKdaUiACtXru0oXgKvJTaJ7+G+yDXtyRaGczdEY9MhswVu+KY+7l6JyqHBBcx4T45knzkgxiRRr/jxUuRAXrqnA54iS0pxf81mYQGmDvRqWyFLJlR76cBkaRaMg0wETio7RDFs2q5TcTWjr8hx1Gh/kXaPvfK3c0E20xfe3oM9RPwlKy9ovYvp53tm5AO9N/hnWhrrC1agLAMhje02JMquFC1Ypi9fU+5eSaTcfPaSwklxumjqGmAA7IEmWY1hor3dK8TTI1/DLjQlAqYBoj4XUMHApU85113LEr+Ja1bpvBsmLZplM0atkUcDPgbpybIVGE5J0XyM4aPX7fg+yScrjUedIvjkUJKhXSNsP7Gsw=
+  file_glob: true
+  file:
+    - csvtojson-*.tar.gz
+    - csvtojson-*.zip
+  skip_cleanup: true
+  on:
+    tags: true

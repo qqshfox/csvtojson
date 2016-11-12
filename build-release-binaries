@@ -1,0 +1,45 @@
+#!/bin/sh
+
+set -e
+
+osarchs=$(cat <<-EOF
+  darwin amd64
+  linux 386 amd64
+  windows 386 amd64
+EOF
+)
+
+VERSION=$( (git describe --tags --dirty || git describe --always --dirty --abbrev=0) 2> /dev/null )
+
+echo "Building csvtojson ${VERSION}"
+
+echo "$osarchs" | while read os archs; do
+  if [ "$os" = "windows" ]; then
+    executable_suffix=".exe"
+    tar_suffix=".zip"
+  else
+    tar_suffix=".tar.gz"
+  fi
+
+  executable_name="csvtojson${executable_suffix}"
+
+  for arch in $archs; do
+    output_folder="${os}-${arch}"
+    rm -rf "$output_folder"
+    mkdir -p "$output_folder"
+    echo "Building csvtojson for GOOS=${os} GOARCH=${arch}"
+
+    GOOS=$os GOARCH=$arch go build -ldflags "-X main.VERSION=${VERSION}" -o "$output_folder/$executable_name"
+
+    releaseTar=csvtojson-"${os}-${arch}-${VERSION}${tar_suffix}"
+    rm -rf "$releaseTar"
+    if [ "$tar_suffix" = ".tar.gz" ]; then
+      tar czvf $releaseTar "$output_folder"
+    else
+      zip -r $releaseTar "$output_folder"
+    fi
+    rm -rf "$output_folder"
+    echo "${os}-${arch} --> ${releaseTar}"
+  done
+done
+echo "Done!"
